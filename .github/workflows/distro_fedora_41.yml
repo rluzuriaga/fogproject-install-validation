@@ -1,0 +1,12 @@
+name: Fedora 41
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  fedora-41:
+    uses: ./.github/workflows/reusable_distro_workflow.yml
+    with:
+      distro: "quay.io/fedora/fedora-minimal:41"
+      package_man: "dnf"
