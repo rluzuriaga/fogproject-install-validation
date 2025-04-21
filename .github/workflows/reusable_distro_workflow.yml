@@ -9,6 +9,9 @@ on:
       package_man:
         required: true
         type: string
+      additional_packages:
+        required: false
+        type: string
 
 defaults:
   run:
@@ -26,13 +29,19 @@ jobs:
           container_name=${distro_name_and_ver/:/_}
           echo "CONTAINER_NAME=$container_name" >> $GITHUB_ENV
       
-      - name: Check if additional package is needed
+      - name: Check if additional package is needed by package manager
         run: |
           if [[ ${{ inputs.package_man }} == "apt" ]]; then
             echo "ADDITIONAL_PKG=libpam-systemd" >> $GITHUB_ENV
           else
             echo "ADDITIONAL_PKG=" >> $GITHUB_ENV
           fi
+      
+      - name: Add additional packages if passed as an input
+        if: ${{ inputs.additional_packages }}
+        run: |
+          additional_packages_input=${{ inputs.additional_packages }}
+          echo "ADDITIONAL_PKG=$ADDITIONAL_PKG $additional_packages_input" >> $GITHUB_ENV
       
       - name: Update container
         run: |

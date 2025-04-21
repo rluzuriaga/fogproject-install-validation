@@ -10,3 +10,4 @@ jobs:
     with:
       distro: "quay.io/fedora/fedora-minimal:42"
       package_man: "dnf"
+      additional_packages: "gawk"
