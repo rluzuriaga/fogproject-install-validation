@@ -46,9 +46,9 @@ jobs:
       - name: Update container
         run: |
           if [[ ${{ inputs.package_man }} == "apt" ]]; then
-            echo "UPDATE_COMMAND=sudo apt update && sudo apt upgrade -y" >> $GITHUB_ENV
+            echo "UPDATE_COMMAND=apt update && apt upgrade -y" >> $GITHUB_ENV
           else
-            echo "UPDATE_COMMAND=sudo dnf update -y" >> $GITHUB_ENV
+            echo "UPDATE_COMMAND=dnf update -y" >> $GITHUB_ENV
           fi
 
       - name: Install Distrobox
@@ -59,10 +59,12 @@ jobs:
           distrobox create --name $CONTAINER_NAME --image ${{ inputs.distro }} \
             --additional-packages "git systemd ${{ inputs.package_man }} sudo $ADDITIONAL_PKG" \
             --init-hooks "$UPDATE_COMMAND" \
-            --init --pull --root --unshare-all
+            --init --pull --root --unshare-all \
+            --additional-flags "--userns=keep-id" --additional-flags "--user 0" \
+            --absolutely-disable-root-password-i-am-really-positively-sure
       
       - name: Clone FOG
         run: distrobox enter --root $CONTAINER_NAME -- git clone -b dev-branch https://github.com/FOGProject/fogproject.git
       
       - name: Install FOG
-        run: distrobox enter --root $CONTAINER_NAME -- sudo ./fogproject/bin/installfog.sh -y
+        run: distrobox enter --root $CONTAINER_NAME -- bash -c 'sudo ./fogproject/bin/installfog.sh -y'
