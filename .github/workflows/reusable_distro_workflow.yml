@@ -25,7 +25,7 @@ jobs:
       - name: Make container name
         run: |
           input_distro=${{ inputs.distro }}
-          distro_name_and_ver=$(echo input_distro | awk -F '/' '{print $NF}')
+          distro_name_and_ver=$(echo $input_distro | awk -F '/' '{print $NF}')
           container_name=${distro_name_and_ver/:/_}
           echo "CONTAINER_NAME=$container_name" >> $GITHUB_ENV
       
@@ -64,7 +64,7 @@ jobs:
             --absolutely-disable-root-password-i-am-really-positively-sure
       
       - name: Clone FOG
-        run: distrobox enter --root $CONTAINER_NAME -- git clone -b working-1.6 https://github.com/FOGProject/fogproject.git
+        run: distrobox enter --root $CONTAINER_NAME -- git clone -b working-1.6 https://github.com/rluzuriaga/fogproject.git
       
       - name: Install FOG
         run: distrobox enter --root $CONTAINER_NAME -- bash -c 'sudo ./fogproject/bin/installfog.sh -y'
