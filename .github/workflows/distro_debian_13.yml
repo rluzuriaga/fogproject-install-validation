@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  debian-12:
+  debian-13:
     uses: ./.github/workflows/reusable_distro_workflow.yml
     with:
       distro: "docker.io/library/debian:13-slim"
