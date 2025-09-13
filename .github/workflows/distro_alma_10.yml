@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  rocky-9:
+  AlmaLinux-10:
     uses: ./.github/workflows/reusable_distro_workflow.yml
     with:
       distro: "docker.io/library/almalinux:10"
