@@ -37,14 +37,6 @@ jobs:
             echo "ADDITIONAL_PKG=" >> $GITHUB_ENV
           fi
       
-      - name: Add additional packages if passed as an input
-        if: ${{ inputs.additional_packages }}
-        run: |
-          additional_packages_input=${{ inputs.additional_packages }}
-          echo "ADDITIONAL_PKG=$ADDITIONAL_PKG $additional_packages_input" >> $GITHUB_ENV
-      - name: Update container
-        run: sudo apt update && sudo apt upgrade -y
-      
       - name: Create Update command
         run: |
           if [[ ${{ inputs.package_man }} == "apt" ]]; then
@@ -54,7 +46,7 @@ jobs:
           fi      
 
       - name: Install Distrobox
-        run: curl -s https://raw.githubusercontent.com/89luca89/distrobox/1.8.2.5/install | sudo sh
+        run: curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sudo sh
 
       - name: Create Distrobox
         run: |
