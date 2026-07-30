@@ -8,5 +8,5 @@ jobs:
   rocky-10:
     uses: ./.github/workflows/reusable_distro_workflow.yml
     with:
-      distro: "quay.io/rockylinux/rockylinux:10-minimal"
+      distro: "quay.io/rockylinux/rockylinux:10"
       package_man: "dnf"
