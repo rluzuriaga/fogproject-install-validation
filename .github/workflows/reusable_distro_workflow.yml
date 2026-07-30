@@ -22,6 +22,42 @@ jobs:
     runs-on: ubuntu-24.04
     
     steps:
+      - name: Ensure crun is new enough for distrobox
+        run: |
+          echo "Checking for pre-existing crun binary..."
+          which crun || echo "crun not found on PATH yet"
+      
+          set +e
+          CURRENT=$(crun --version 2>/dev/null | head -1 | grep -oP '\d+\.\d+\.\d+')
+          set -e
+          echo "Current crun: ${CURRENT:-none found}"
+      
+          NEED_UPGRADE=1
+          if [ -n "$CURRENT" ] && dpkg --compare-versions "$CURRENT" ge "1.14.3"; then
+            NEED_UPGRADE=0
+          fi
+      
+          if [ "$NEED_UPGRADE" = "1" ]; then
+            echo "apt version too old (or missing), upgrading via apt..."
+            sudo apt-get update -qq
+            sudo apt-get install -y crun || true
+      
+            NEW=$(crun --version 2>/dev/null | head -1 | grep -oP '\d+\.\d+\.\d+')
+            if [ -z "$NEW" ] || ! dpkg --compare-versions "$NEW" ge "1.14.3"; then
+              echo "apt version still too old ($NEW), pulling latest release from GitHub..."
+              # Pin a known-good version below if the latest release ever regresses:
+              # CRUN_VERSION="1.19.1"
+              CRUN_VERSION=$(curl -sSL https://api.github.com/repos/containers/crun/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+              echo "Latest crun release: $CRUN_VERSION"
+              curl -sSL -o /tmp/crun \
+                "https://github.com/containers/crun/releases/download/${CRUN_VERSION}/crun-${CRUN_VERSION}-linux-amd64"
+              chmod +x /tmp/crun
+              sudo mv /tmp/crun "$(command -v crun)"
+            fi
+          fi
+          echo "Final crun binary location: $(which crun)"
+          echo "Final crun version: $(crun --version | head -1
+      
       - name: Make container name
         run: |
           input_distro=${{ inputs.distro }}
@@ -49,7 +85,7 @@ jobs:
             echo "UPDATE_COMMAND=apt update && apt upgrade -y" >> $GITHUB_ENV
           else
             echo "UPDATE_COMMAND=dnf update -y" >> $GITHUB_ENV
-          fi
+          fi      
 
       - name: Install Distrobox
         run: curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sudo sh
@@ -61,7 +97,7 @@ jobs:
             --init-hooks "$UPDATE_COMMAND" \
             --init --pull --root --unshare-all \
             --absolutely-disable-root-password-i-am-really-positively-sure
-      
+
       - name: Clone FOG
         run: distrobox enter --root $CONTAINER_NAME -- git clone -b dev-branch https://github.com/FOGProject/fogproject.git
       
